@@ -125,6 +125,7 @@ registration_file_headers = [
 selective_headers = [
     'first_name',
     'last_name',
+ 'requested_public_records_exemption',
     'birth_date',
     'county_code',
     'residence_addr_line_1',
