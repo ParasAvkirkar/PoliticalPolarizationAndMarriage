@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[40]:
 
 
 import pandas as pd
@@ -46,13 +46,13 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 
 
-# In[2]:
+# In[41]:
 
 
 ny_cols = ["last_name", "first_name", "middle_name", "name_suffix", "house_number", "house_fractional_addr", "residence_apartment", "residence_pre_street_direction", "residence_street_name", "residence_post_street_direction", "residence_city", "residence_zip_code_5", "residence_zip_code_4", "mail_addr1", "mail_addr2", "mail_addr3", "mail_addr4", "dob", "gender", "political_party", "other_party", "county_code", "election_district", "legislative_district", "town_city", "ward", "congressional_district", "senate_district", "assembly_district", "last_date_voted", "last_year_voted", "last_county_voted", "last_registered_address", "last_registered_name", "county_voter_registration_no", "application_date", "application_source", "identification_required_flag", "identification_verification_requirement_met_flag", "voter_status_codes", "status_reason_codes", "inactive_voter_date", "purge_voter_date", "unique_nys_voter_id", "voter_history"]
 
 
-# In[3]:
+# In[42]:
 
 
 selective_headers = [
@@ -74,19 +74,19 @@ selective_headers = [
 # precinct and race was not found
 
 
-# In[4]:
+# In[43]:
 
 
 new_york_path = "data/NewYork"
 
 
-# In[5]:
+# In[44]:
 
 
 COUNTY=sys.argv[1]
 
 
-# In[6]:
+# In[45]:
 
 
 date_str = sys.argv[2]
@@ -94,14 +94,14 @@ date_str = sys.argv[2]
 
 # ## Uncomment below lines and add parameters manually when exploring through notebook instead of python-script
 
-# In[37]:
+# In[46]:
 
 
-# date_str = "20121231"
+# date_str = "20160511"
 # COUNTY = "31"
 
 
-# In[9]:
+# In[47]:
 
 
 import os
@@ -109,19 +109,19 @@ if not os.path.exists(new_york_path + "/couples/" + date_str):
     os.makedirs(new_york_path + "/couples/" + date_str)
 
 
-# In[10]:
+# In[48]:
 
 
 source_county_file_name = "county_" + date_str + "_" + COUNTY + ".csv"
 
 
-# In[11]:
+# In[49]:
 
 
 source_county_file_name
 
 
-# In[12]:
+# In[50]:
 
 
 COUPLES_SAVED_PATH = new_york_path + "/couples/" + date_str + "/" + "couples_" + date_str + "_" + COUNTY + ".csv"
@@ -133,55 +133,67 @@ COUPLES_SAVED_PATH = new_york_path + "/couples/" + date_str + "/" + "couples_" +
 COUPLES_SAVED_PATH
 
 
-# In[14]:
+# In[51]:
+
+
+new_york_path + "/" + date_str + "_county_files/" + source_county_file_name
+
+
+# In[52]:
 
 
 global_df = pd.read_csv(new_york_path + "/" + date_str + "_county_files/" + source_county_file_name, sep="\t",  encoding='iso-8859-1')
 
 
-# In[15]:
+# In[53]:
 
 
 global_df.head()
 
 
-# In[16]:
+# In[54]:
+
+
+global_df.shape
+
+
+# In[55]:
 
 
 global_df_copy = global_df.copy(deep=True)
 
 
-# In[17]:
+# In[56]:
 
 
 merge = pd.merge(global_df, global_df_copy, on=["uniq_addr"], suffixes=["_L", "_R"])
 
 
-# In[18]:
+# In[57]:
 
 
 merge = merge[merge["unique_nys_voter_id_L"] != merge["unique_nys_voter_id_R"]]
 
 
-# In[19]:
+# In[58]:
 
 
 merge.shape
 
 
-# In[20]:
+# In[59]:
 
 
 filtered = merge[merge["unique_nys_voter_id_L"] < merge["unique_nys_voter_id_R"]]
 
 
-# In[21]:
+# In[60]:
 
 
 filtered.shape
 
 
-# In[22]:
+# In[61]:
 
 
 def modified_couple_heuristic(row):
@@ -214,85 +226,85 @@ def modified_couple_heuristic(row):
         
 
 
-# In[23]:
+# In[62]:
 
 
 filtered.columns
 
 
-# In[24]:
+# In[63]:
 
 
 filtered.shape
 
 
-# In[25]:
+# In[64]:
 
 
 couples = filtered[filtered.apply(modified_couple_heuristic, axis=1)]
 
 
-# In[26]:
+# In[65]:
 
 
 couples.shape
 
 
-# In[27]:
+# In[66]:
 
 
 couples.head()
 
 
-# In[28]:
+# In[67]:
 
 
 global_df.shape
 
 
-# In[29]:
+# In[68]:
 
 
 couples["age_diff"] = couples.apply(lambda row: abs(row["age_L"] - row["age_R"]), axis=1)
 
 
-# In[30]:
+# In[69]:
 
 
 sorted_couples = couples.sort_values(by="age_diff")
 
 
-# In[31]:
+# In[70]:
 
 
 single_house_couples = sorted_couples.drop_duplicates(subset="uniq_addr", keep="first")
 
 
-# In[32]:
+# In[71]:
 
 
 single_house_couples.shape
 
 
-# In[33]:
+# In[72]:
 
 
 global_df.shape
 
 
-# In[34]:
+# In[73]:
 
 
 COUPLES_SAVED_PATH
 
 
-# In[35]:
+# In[74]:
 
 
 single_house_couples.to_csv(COUPLES_SAVED_PATH, sep="\t", index=False)
 
 
-# In[39]:
+# In[75]:
 
 
 print("Done processing " + COUPLES_SAVED_PATH)
